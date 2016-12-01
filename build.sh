@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 HERE="$(cd $(dirname $0) && pwd)"
 
@@ -55,12 +55,8 @@ if [ "$startpos" -le 2 ]; then
   mkdir -p build-newlib
   pushd build-newlib
   ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX"
-  set +e
-  # The newlib build is broken at present! But, we can install "enough" to
-  # build the final GCC. Urgh!
   make
   make install
-  set -e
   popd
 fi
 if [ "$startpos" -le 3 ]; then
