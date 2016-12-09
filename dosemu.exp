@@ -1,0 +1,36 @@
+# Board file for running DOS .com programs in DOSEMU.
+
+load_generic_config "unix"
+
+process_multilib_options ""
+
+set_board_info compiler "[find_gcc]"
+
+set_board_info ldflags "-Tdos-com.ld -lgcc -lc -ldos-com -lnosys"
+
+set_board_info noargs 1
+
+set_board_info gcc,stack_size 57344
+
+proc dosemu_load {dest prog args} {
+    global env
+    exec cp $prog $env(HERE)/testcase.com
+    set output ""
+    spawn dosemu "-dumb" $env(HERE)/run.bat testcase.com
+    expect {
+	timeout {
+	    return [list "unresolved" ""]
+	}
+	eof {
+	    set output $expect_out(buffer)
+	}
+    }
+    set status [check_for_board_status output]
+    if { $status != 0 } {
+	set result "fail"
+	set output ""
+    } else {
+	set result "pass"
+    }
+    return [list $result $output]
+}

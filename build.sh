@@ -8,49 +8,58 @@ PARALLEL="-j 8"
 startpos=0
 
 case "$1" in
-  mklinks)
+  binutils)
     startpos=0
     ;;
-  stage1)
+  mklinks)
     startpos=1
     ;;
-  newlib)
+  stage1)
     startpos=2
     ;;
-  stage2)
+  newlib)
     startpos=3
+    ;;
+  stage2)
+    startpos=4
     ;;
   *)
     ;;
 esac
 set -e
 
-# This assumes you're running on an x86 linux machine!
-if [ "$startpos" -le 0 ]; then
-  rm -rf "$PREFIX/bin"
-  mkdir -p "$PREFIX/bin"
-
-  pushd "$PREFIX/bin"
-  for prog in as ld ar ranlib strip nm; do
-    ln -s "$(which $prog)" ia16-unknown-elf-$prog
-  done
-  popd
-fi
-
 export PATH="$PREFIX/bin":$PATH
 
 cd "$HERE"
 
-if [ "$startpos" -le 1 ]; then
-  rm -rf build
-  mkdir -p build
-  pushd build
-  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --without-headers --with-newlib --enable-languages=c --disable-libssp
+if [ "$startpos" -le 0 ]; then
+  rm -rf "$PREFIX/bin"
+  mkdir -p "$PREFIX/bin"
+  rm -rf build-binutils
+  mkdir -p build-binutils
+  pushd build-binutils
+  ../binutils-gdb/configure --target=i386-unknown-elf --prefix="$PREFIX"
   make $PARALLEL
   make install
   popd
 fi
+if [ "$startpos" -le 1 ]; then
+  pushd "$PREFIX/bin"
+  for prog in addr2line ar as c++filt elfedit gdb gprof ld ld.bfd nm objcopy objdump ranlib readelf size strings strip; do
+    ln -s i386-unknown-elf-$prog ia16-unknown-elf-$prog
+  done
+  popd
+fi
 if [ "$startpos" -le 2 ]; then
+  rm -rf build
+  mkdir -p build
+  pushd build
+  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --without-headers --with-newlib --enable-languages=c --disable-libssp --with-as="$PREFIX/bin/ia16-unknown-elf-as"
+  make $PARALLEL
+  make install
+  popd
+fi
+if [ "$startpos" -le 3 ]; then
   rm -rf build-newlib
   mkdir -p build-newlib
   pushd build-newlib
@@ -59,11 +68,11 @@ if [ "$startpos" -le 2 ]; then
   make install
   popd
 fi
-if [ "$startpos" -le 3 ]; then
+if [ "$startpos" -le 4 ]; then
   rm -rf build2
   mkdir -p build2
   pushd build2
-  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=c
+  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=c --with-as="$PREFIX/bin/ia16-unknown-elf-as"
   make $PARALLEL
   make install
   popd
