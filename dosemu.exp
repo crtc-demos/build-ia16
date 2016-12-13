@@ -10,27 +10,31 @@ set_board_info ldflags "-Tdos-com.ld -lgcc -lc -ldos-com -lnosys"
 
 set_board_info noargs 1
 
-set_board_info gcc,stack_size 57344
+set_board_info gcc,stack_size 16000
 
 proc dosemu_load {dest prog args} {
     global env
     exec cp $prog $env(HERE)/testcase.com
     set output ""
-    spawn dosemu "-dumb" $env(HERE)/run.bat testcase.com
+    set result "unresolved"
+    set pid [spawn $env(HERE)/dosemu/bin/dosemu "--Flibdir" /usr/lib/dosemu "-dumb" $env(HERE)/run.bat testcase.com]
+#    set timeout 300
     expect {
 	timeout {
-	    return [list "unresolved" ""]
+	    exec kill $pid
 	}
 	eof {
 	    set output $expect_out(buffer)
+	    set status [check_for_board_status output]
+	    if { $status != 0 } {
+		set result "fail"
+		set output ""
+	    } else {
+		set result "pass"
+	    }
 	}
     }
-    set status [check_for_board_status output]
-    if { $status != 0 } {
-	set result "fail"
-	set output ""
-    } else {
-	set result "pass"
-    }
+    catch { close }
+    wait
     return [list $result $output]
 }
