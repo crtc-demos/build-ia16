@@ -1,0 +1,39 @@
+# Board file for running DOS .com programs in 86sim.
+
+load_generic_config "unix"
+
+process_multilib_options ""
+
+set_board_info compiler "[find_gcc]"
+
+set_board_info ldflags "-Tdos-com.ld -lgcc -lc -ldos-com -lnosys"
+
+set_board_info noargs 1
+
+set_board_info gcc,stack_size 16000
+
+proc 86sim_load {dest prog args} {
+    global env
+    set output ""
+    set result "unresolved"
+    set pid [spawn $env(HERE)/86sim/86sim $prog]
+#    set timeout 300
+    expect {
+	timeout {
+	    exec kill $pid
+	}
+	eof {
+	    set output $expect_out(buffer)
+	    set status [check_for_board_status output]
+	    if { $status != 0 } {
+		set result "fail"
+		set output ""
+	    } else {
+		set result "pass"
+	    }
+	}
+    }
+    catch { close }
+    wait
+    return [list $result $output]
+}
