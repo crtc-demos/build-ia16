@@ -6,7 +6,7 @@ process_multilib_options ""
 
 set_board_info compiler "[find_gcc]"
 
-set_board_info ldflags "-Tdos-com.ld -lgcc -lc -ldos-com -lnosys"
+set_board_info ldflags "-Tdos-com.ld -s"
 
 set_board_info noargs 1
 
