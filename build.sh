@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -o pipefail
 
 SCRIPTDIR="$(dirname "$0")"
 export HERE="$(cd "$SCRIPTDIR" && pwd)"
@@ -156,7 +157,7 @@ if in_list gcc2 BUILDLIST; then
   rm -rf build2
   mkdir build2
   pushd build2
-  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-ssp --enable-languages=$LANGUAGES --with-as="$PREFIX/bin/ia16-unknown-elf-as" $EXTRABUILD2OPTS | tee build.log
+  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES --with-as="$PREFIX/bin/ia16-unknown-elf-as" $EXTRABUILD2OPTS | tee build.log
   make $PARALLEL | tee -a build.log
   make $PARALLEL install | tee -a build.log
   popd
@@ -199,7 +200,7 @@ if in_list debug BUILDLIST; then
   rm -rf build-debug
   mkdir build-debug
   pushd build-debug
-  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-ssp --enable-languages=$LANGUAGES --with-as="$PREFIX/bin/ia16-unknown-elf-as" $EXTRABUILD2OPTS | tee build.log
+  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES --with-as="$PREFIX/bin/ia16-unknown-elf-as" $EXTRABUILD2OPTS | tee build.log
   make $PARALLEL 'CFLAGS=-g -O0' 'CXXFLAGS=-g -O0' 'BOOT_CFLAGS=-g -O0' | tee -a build.log
   popd
 fi
