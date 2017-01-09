@@ -7,6 +7,7 @@ SCRIPTDIR="$(dirname "$0")"
 export HERE="$(cd "$SCRIPTDIR" && pwd)"
 PREFIX="$HERE/prefix"
 PARALLEL="-j 8"
+#PARALLEL=""
 
 # Set this to false to disable C++ (speed up build a bit).
 WITHCXX=false
@@ -126,10 +127,10 @@ if in_list gcc1 BUILDLIST; then
   rm -rf build
   mkdir build
   pushd build
-  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --without-headers --with-newlib --enable-languages=c --disable-libssp --with-as="$PREFIX/bin/ia16-unknown-elf-as" | tee build.log
+  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --without-headers --with-newlib --enable-languages=c --disable-libssp --with-as="$PREFIX/bin/ia16-unknown-elf-as" 2>&1 | tee build.log
 #--enable-checking=all,valgrind
-  make $PARALLEL | tee -a build.log
-  make $PARALLEL install | tee -a build.log
+  make $PARALLEL 2>&1 | tee -a build.log
+  make $PARALLEL 2>&1 install | tee -a build.log
   popd
 fi
 
@@ -142,9 +143,9 @@ if in_list newlib BUILDLIST; then
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
-  ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" | tee build.log
-  make $PARALLEL | tee -a build.log
-  make $PARALLEL install | tee -a build.log
+  ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" 2>&1 | tee build.log
+  make $PARALLEL 'CFLAGS=-D_IEEE_LIBM' 2>&1 | tee -a build.log
+  make $PARALLEL install 2>&1 | tee -a build.log
   popd
 fi
 
@@ -157,9 +158,9 @@ if in_list gcc2 BUILDLIST; then
   rm -rf build2
   mkdir build2
   pushd build2
-  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES --with-as="$PREFIX/bin/ia16-unknown-elf-as" $EXTRABUILD2OPTS | tee build.log
-  make $PARALLEL | tee -a build.log
-  make $PARALLEL install | tee -a build.log
+  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES --with-as="$PREFIX/bin/ia16-unknown-elf-as" $EXTRABUILD2OPTS 2>&1 | tee build.log
+  make $PARALLEL 2>&1 | tee -a build.log
+  make $PARALLEL install 2>&1 | tee -a build.log
   popd
 fi
 
@@ -185,7 +186,7 @@ if in_list test BUILDLIST; then
   while [[ -e ../fails-$i.txt ]] ; do
     i=$[$i+1]
   done
-  make -k check RUNTESTFLAGS="--target_board=86sim" | tee test.log
+  make -k check RUNTESTFLAGS="--target_board=86sim" 2>&1 | tee test.log
   grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS\|^UNRESOLVED gcc/testsuite/gcc/gcc.log > ../fails-$i.txt
   cp gcc/testsuite/gcc/gcc.log ../gcc-$i.log
   popd
@@ -200,7 +201,7 @@ if in_list debug BUILDLIST; then
   rm -rf build-debug
   mkdir build-debug
   pushd build-debug
-  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES --with-as="$PREFIX/bin/ia16-unknown-elf-as" $EXTRABUILD2OPTS | tee build.log
-  make $PARALLEL 'CFLAGS=-g -O0' 'CXXFLAGS=-g -O0' 'BOOT_CFLAGS=-g -O0' | tee -a build.log
+  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES --with-as="$PREFIX/bin/ia16-unknown-elf-as" $EXTRABUILD2OPTS 2>&1 | tee build.log
+  make $PARALLEL 'CFLAGS=-g -O0' 'CXXFLAGS=-g -O0' 'BOOT_CFLAGS=-g -O0' 2>&1 | tee -a build.log
   popd
 fi

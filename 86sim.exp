@@ -23,7 +23,7 @@ proc 86sim_load {dest prog args} {
     set output ""
     set result "unresolved"
     set pid [spawn $env(HERE)/86sim/86sim $prog]
-#    set timeout 300
+    set timeout 300
     expect {
 	timeout {
 	    exec kill $pid
