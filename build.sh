@@ -145,7 +145,7 @@ if in_list newlib BUILDLIST; then
   pushd build-newlib
   ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-D_IEEE_LIBM' 2>&1 | tee -a build.log
-  make $PARALLEL install 2>&1 | tee -a build.log
+  make install 2>&1 | tee -a build.log
   popd
 fi
 
