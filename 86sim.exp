@@ -12,12 +12,6 @@ set_board_info noargs 1
 
 set_board_info gcc,stack_size 16000
 
-rename prune_gcc_output prune_gcc_output_original
-proc prune_gcc_output { text } {
-    regsub -all "(^|\n)\[^\n\]*: warning: target system does not support debug output\[^\n\]*" $text "" text
-    return prune_gcc_output_original $text
-}
-
 proc 86sim_load {dest prog args} {
     global env
     set output ""

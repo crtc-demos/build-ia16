@@ -10,7 +10,7 @@ PARALLEL="-j 8"
 #PARALLEL=""
 
 # Set this to false to disable C++ (speed up build a bit).
-WITHCXX=false
+WITHCXX=true
 
 in_list () {
   local needle=$1
@@ -188,7 +188,11 @@ if in_list test BUILDLIST; then
   done
   make -k check RUNTESTFLAGS="--target_board=86sim" 2>&1 | tee test.log
   grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS\|^UNRESOLVED gcc/testsuite/gcc/gcc.log > ../fails-$i.txt
+  grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS\|^UNRESOLVED gcc/testsuite/g++/g++.log >> ../fails-$i.txt
+  grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS\|^UNRESOLVED ia16-unknown-elf/libstdc++-v3/testsuite/libstdc++.log >> ../fails-$i.txt
   cp gcc/testsuite/gcc/gcc.log ../gcc-$i.log
+  cp gcc/testsuite/g++/g++.log ../g++-$i.log
+  cp ia16-unknown-elf/libstdc++-v3/testsuite/libstdc++.log ../libstdc++-$i.log
   popd
 fi
 
