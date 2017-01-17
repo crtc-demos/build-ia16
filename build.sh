@@ -144,7 +144,7 @@ if in_list newlib BUILDLIST; then
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
-  ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" 2>&1 | tee build.log
+  ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-newlib-wide-orient 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-D_IEEE_LIBM' 2>&1 | tee -a build.log
   make install 2>&1 | tee -a build.log
   popd
@@ -183,17 +183,19 @@ if in_list test BUILDLIST; then
   echo
   export DEJAGNU="$HERE/site.exp"
   pushd build2
+  GROUP=""
+  if [ -f ../group ]; then
+    read GROUP < ../group
+  fi
   i=0
-  while [[ -e ../fails-$i.txt ]] ; do
+  while [[ -e ../fails-$GROUP$i.txt ]] ; do
     i=$[$i+1]
   done
   make -k check RUNTESTFLAGS="--target_board=86sim" 2>&1 | tee test.log
-  grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS\|^UNRESOLVED gcc/testsuite/gcc/gcc.log > ../fails-$i.txt
-  grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS\|^UNRESOLVED gcc/testsuite/g++/g++.log >> ../fails-$i.txt
-  grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS\|^UNRESOLVED ia16-unknown-elf/libstdc++-v3/testsuite/libstdc++.log >> ../fails-$i.txt
-  cp gcc/testsuite/gcc/gcc.log ../gcc-$i.log
-  cp gcc/testsuite/g++/g++.log ../g++-$i.log
-  cp ia16-unknown-elf/libstdc++-v3/testsuite/libstdc++.log ../libstdc++-$i.log
+  ../log_filter gcc/testsuite/gcc/gcc.log >../results-$GROUP$i.log
+  ../log_filter gcc/testsuite/g++/g++.log >>../results-$GROUP$i.log
+  ../log_filter ia16-unknown-elf/libstdc++-v3/testsuite/libstdc++.log >>../results-$GROUP$i.log
+  grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS\|^UNRESOLVED ../results-$GROUP$i.log > ../fails-$GROUP$i.txt
   popd
 fi
 
