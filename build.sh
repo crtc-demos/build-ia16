@@ -144,7 +144,7 @@ if in_list newlib BUILDLIST; then
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
-  ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-newlib-wide-orient --enable-newlib-nano-malloc 2>&1 | tee build.log
+  ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-newlib-wide-orient --enable-newlib-nano-malloc --disable-newlib-multithread 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-D_IEEE_LIBM' 2>&1 | tee -a build.log
   make install 2>&1 | tee -a build.log
   popd
