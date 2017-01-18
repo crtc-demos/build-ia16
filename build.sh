@@ -144,7 +144,7 @@ if in_list newlib BUILDLIST; then
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
-  ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-newlib-wide-orient 2>&1 | tee build.log
+  ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-newlib-wide-orient --enable-newlib-nano-malloc 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-D_IEEE_LIBM' 2>&1 | tee -a build.log
   make install 2>&1 | tee -a build.log
   popd
@@ -195,7 +195,7 @@ if in_list test BUILDLIST; then
   ../log_filter gcc/testsuite/gcc/gcc.log >../results-$GROUP$i.log
   ../log_filter gcc/testsuite/g++/g++.log >>../results-$GROUP$i.log
   ../log_filter ia16-unknown-elf/libstdc++-v3/testsuite/libstdc++.log >>../results-$GROUP$i.log
-  grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS\|^UNRESOLVED ../results-$GROUP$i.log > ../fails-$GROUP$i.txt
+  grep -E ^FAIL\|^WARNING\|^ERROR\|^XPASS ../results-$GROUP$i.log > ../fails-$GROUP$i.txt
   popd
 fi
 
