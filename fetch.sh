@@ -9,3 +9,5 @@ wget http://www.mpfr.org/mpfr-current/mpfr-3.1.5.tar.bz2
 tar -xjf mpfr-3.1.5.tar.bz2
 wget ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz
 tar -xzf mpc-1.0.3.tar.gz
+wget ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2
+tar -xjf isl-0.16.1.tar.bz2

@@ -30,11 +30,11 @@ BUILDLIST=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    clean|binutils|mklinks|gcc1|newlib|gcc2|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|mv-windows|gcc-windows)
+    clean|binutils|mklinks|isl|gcc1|newlib|gcc2|sim|test|debug|binutils-debug|clean-windows|prereqs-windows|binutils-windows|mv-windows|gcc-windows)
       BUILDLIST=( "${BUILDLIST[@]}" $1 )
       ;;
     all)
-      BUILDLIST=("clean" "binutils" "mklinks" "gcc1" "newlib" "gcc2" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "mv-windows" "gcc-windows")
+      BUILDLIST=("clean" "binutils" "mklinks" "isl" "gcc1" "newlib" "gcc2" "sim" "test" "debug" "binutils-debug" "clean-windows" "prereqs-windows" "binutils-windows" "mv-windows" "gcc-windows")
       ;;
     *)
       echo "Unknown option '$1'."
@@ -45,7 +45,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${#BUILDLIST}" -eq 0 ]; then
-  echo "build options: clean binutils mklinks gcc1 newlib gcc2 sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows mv-windows gcc-windows"
+  echo "build options: clean binutils mklinks isl gcc1 newlib gcc2 sim test debug binutils-debug all clean-windows prereqs-windows binutils-windows mv-windows gcc-windows"
   exit 1
 fi
 
@@ -119,6 +119,21 @@ if in_list mklinks BUILDLIST; then
   popd
 fi
 
+if in_list isl BUILDLIST; then
+  echo
+  echo "****************"
+  echo "* Building ISL *"
+  echo "****************"
+  echo
+  rm -rf build-isl prefix-isl
+  mkdir build-isl
+  pushd build-isl
+  ../isl-0.16.1/configure --prefix="$PREFIX-isl" --disable-shared 2>&1 | tee build.log
+  make $PARALLEL 2>&1 | tee -a build.log
+  make $PARALLEL 2>&1 install | tee -a build.log
+  popd
+fi
+
 if in_list gcc1 BUILDLIST; then
   echo
   echo "************************"
@@ -128,7 +143,7 @@ if in_list gcc1 BUILDLIST; then
   rm -rf build
   mkdir build
   pushd build
-  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --without-headers --with-newlib --enable-languages=c --disable-libssp 2>&1 | tee build.log
+  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --without-headers --with-newlib --enable-languages=c --disable-libssp --with-isl="$PREFIX-isl" 2>&1 | tee build.log
 #--enable-checking=all,valgrind
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL 2>&1 install | tee -a build.log
@@ -159,7 +174,7 @@ if in_list gcc2 BUILDLIST; then
   rm -rf build2
   mkdir build2
   pushd build2
-  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES $EXTRABUILD2OPTS 2>&1 | tee build.log
+  ../gcc-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES $EXTRABUILD2OPTS --with-isl="$PREFIX-isl" 2>&1 | tee build.log
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
@@ -252,6 +267,13 @@ if in_list prereqs-windows BUILDLIST; then
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
+  rm -rf build-isl-windows
+  mkdir build-isl-windows
+  pushd build-isl-windows
+  ../isl-0.16.1/configure --target=i686-w64-mingw32 --host=i686-w64-mingw32 --prefix="$PREFIX-prereqs" --disable-shared --with-gmp-prefix="$PREFIX-prereqs" 2>&1 | tee -a build.log
+  make $PARALLEL 2>&1 | tee -a build.log
+  make $PARALLEL install 2>&1 | tee -a build.log
+  popd
   mkdir "$PREFIX-windows/ia16-unknown-elf"
   cp -R "$PREFIX/ia16-unknown-elf/lib" "$PREFIX-windows/ia16-unknown-elf"
   cp -R "$PREFIX/ia16-unknown-elf/include" "$PREFIX-windows/ia16-unknown-elf"
@@ -298,7 +320,7 @@ if in_list gcc-windows BUILDLIST; then
   pushd build-windows
   OLDPATH=$PATH
   export PATH=$PREFIX-windows/bin:$PATH
-  ../gcc-ia16/configure --host=i686-w64-mingw32 --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES --with-gmp="$PREFIX-prereqs" --with-mpfr="$PREFIX-prereqs" --with-mpc="$PREFIX-prereqs" $EXTRABUILD2OPTS 2>&1 | tee build.log
+  ../gcc-ia16/configure --host=i686-w64-mingw32 --target=ia16-unknown-elf --prefix="$PREFIX" --disable-libssp --enable-languages=$LANGUAGES --with-gmp="$PREFIX-prereqs" --with-mpfr="$PREFIX-prereqs" --with-mpc="$PREFIX-prereqs" $EXTRABUILD2OPTS --with-isl="$PREFIX-prereqs" 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2' 'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
   make $PARALLEL install prefix=$PREFIX-windows 2>&1 | tee -a build.log
   export PATH=$OLDPATH
