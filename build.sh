@@ -186,7 +186,7 @@ if in_list sim BUILDLIST; then
   echo "* Building simulator *"
   echo "**********************"
   echo
-  rm 86sim/86sim
+  [ -e 86sim/86sim ] && rm 86sim/86sim
   gcc -Wall -O2 86sim/86sim.cpp -o 86sim/86sim
 fi
 
