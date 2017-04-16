@@ -84,7 +84,7 @@ if in_list binutils BUILDLIST; then
   rm -rf build-binutils
   mkdir build-binutils
   pushd build-binutils
-  ../binutils-gdb/configure --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
+  ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
   make $PARALLEL 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
@@ -99,7 +99,7 @@ if in_list binutils-debug BUILDLIST; then
   rm -rf build-binutils-debug
   mkdir build-binutils-debug
   pushd build-binutils-debug
-  ../binutils-gdb/configure --target=ia16-elf --prefix="$PREFIX" 2>&1 | tee build.log
+  ../binutils-ia16/configure --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-g -O0' 'CXXFLAGS=-g -O0' 'BOOT_CFLAGS=-g -O0' 2>&1 | tee -a build.log
   make $PARALLEL install 2>&1 | tee -a build.log
   popd
@@ -274,7 +274,7 @@ if in_list binutils-windows BUILDLIST; then
   rm -rf build-binutils-windows
   mkdir build-binutils-windows
   pushd build-binutils-windows
-  ../binutils-gdb/configure --host=i686-w64-mingw32 --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls | tee build.log
+  ../binutils-ia16/configure --host=i686-w64-mingw32 --target=ia16-elf --prefix="$PREFIX" --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-nls 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-s -O2' 'CXXFLAGS=-s -O2' 'BOOT_CFLAGS=-s -O2' 2>&1 | tee -a build.log
   make $PARALLEL install prefix=$PREFIX-windows 2>&1 | tee -a build.log
   popd
