@@ -159,7 +159,7 @@ if in_list newlib BUILDLIST; then
   rm -rf build-newlib
   mkdir build-newlib
   pushd build-newlib
-  ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-newlib-wide-orient --enable-newlib-nano-malloc --disable-newlib-multithread 2>&1 | tee build.log
+  ../newlib-ia16/configure --target=ia16-unknown-elf --prefix="$PREFIX" --disable-newlib-wide-orient --enable-newlib-nano-malloc --disable-newlib-multithread --enable-newlib-global-atexit --enable-newlib-reent-small 2>&1 | tee build.log
   make $PARALLEL 'CFLAGS=-D_IEEE_LIBM' 2>&1 | tee -a build.log
   make install 2>&1 | tee -a build.log
   popd
@@ -186,7 +186,7 @@ if in_list sim BUILDLIST; then
   echo "* Building simulator *"
   echo "**********************"
   echo
-  rm 86sim/86sim
+  [ -e 86sim/86sim ] && rm 86sim/86sim
   gcc -Wall -O2 86sim/86sim.cpp -o 86sim/86sim
 fi
 
